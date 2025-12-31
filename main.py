@@ -9,7 +9,7 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from torchvision import models, transforms
 from sklearn.model_selection import train_test_split
-from my_utils import fix_seed
+from my_utils import fix_seed, calculate_confusion_matrix
 
 class ProductDataset(Dataset):
     def __init__(self, images_paths, labels, transform=None):
@@ -107,7 +107,7 @@ def train_model(model, criterion, optimizer, dataloaders, dataset_sizes, device,
 
 if __name__ == '__main__':
     fix_seed(42)
-    
+
     datadir = r"C:\Users\user\2wins-test\dataset"
     if not os.path.exists(datadir):
         datadir = "dataset"
@@ -164,3 +164,6 @@ if __name__ == '__main__':
 
     torch.save(model_ft.state_dict(), 'resnet18_base.pth')
     print("モデルを保存しました (resnet18_base.pth)。")
+
+    # 混同行列の計算
+    calculate_confusion_matrix(model_ft, dataloaders['val'], device, class_names)
