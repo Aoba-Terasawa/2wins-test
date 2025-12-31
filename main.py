@@ -18,11 +18,12 @@ INPUT_SIZE = 448
 BATCH_SIZE = 32
 NUM_EPOCHS = 15
 WEIGHTS = [3.5, 1.0] # [bad, good]
+THRESHOLD = 0.95
 OPTIMIZER = "Adam"
 LEARNING_RATE = 0.0001
 # MOMENTUM = 0.9
 SEED = 42
-SAVE_NAME = "resnet18_base.pth"
+SAVE_NAME = "resnet18_threshold.pth"
 
 class ProductDataset(Dataset):
     def __init__(self, images_paths, labels, transform=None):
@@ -90,12 +91,15 @@ def train_model(model, criterion, optimizer, dataloaders, dataset_sizes, device,
 
                 with torch.set_grad_enabled(phase == 'train'):
                     outputs = model(inputs)
-                    _, preds = torch.max(outputs, 1)
                     loss = criterion(outputs, labels)
 
                     if phase == 'train':
                         loss.backward()
                         optimizer.step()
+
+                probs = torch.softmax(outputs, dim=1)
+                good_probs = probs[:, 1]
+                preds = (good_probs >= THRESHOLD).long()
 
                 running_loss += loss.item() * inputs.size(0)
                 running_corrects += torch.sum(preds == labels.data).item()
@@ -184,4 +188,4 @@ if __name__ == '__main__':
     print(f"モデルを保存しました ({SAVE_NAME})。")
 
     # 混同行列の計算
-    calculate_confusion_matrix(model_ft, dataloaders['val'], device, class_names)
+    calculate_confusion_matrix(model_ft, dataloaders['val'], device, class_names, threshold=THRESHOLD)
