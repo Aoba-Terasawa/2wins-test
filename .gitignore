@@ -1,0 +1,11 @@
+# 仮想環境
+.venv/
+
+# Pythonキャッシュ
+__pycache__/
+
+# データセット
+dataset/
+
+# モデル重み
+*.pth
