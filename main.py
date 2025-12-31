@@ -14,11 +14,12 @@ from my_utils import fix_seed, calculate_confusion_matrix
 DATA_DIR = r"C:\Users\user\2wins-test\dataset"
 TEST_SIZE = 0.3
 VAL_SIZE = 0.5  # train : val : test = 0.7 : 0.15 : 0.15
-INPUT_SIZE = 224
+INPUT_SIZE = 448
 BATCH_SIZE = 32
-NUM_EPOCHS = 10
-LEARNING_RATE = 0.001
-MOMENTUM = 0.9
+NUM_EPOCHS = 15
+OPTIMIZER = "Adam"
+LEARNING_RATE = 0.0001
+# MOMENTUM = 0.9
 SEED = 42
 SAVE_NAME = "resnet18_base.pth"
 
@@ -145,6 +146,7 @@ if __name__ == '__main__':
     transform_train = transforms.Compose([
         transforms.Resize((input_size, input_size)),
         transforms.RandomHorizontalFlip(),
+        transforms.RandomVerticalFlip(),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
@@ -168,7 +170,10 @@ if __name__ == '__main__':
     model_ft = model_ft.to(device)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer_ft = optim.SGD(model_ft.parameters(), lr=LEARNING_RATE, momentum=MOMENTUM)
+    if OPTIMIZER == "SGD":
+        optimizer_ft = optim.SGD(model_ft.parameters(), lr=LEARNING_RATE, momentum=MOMENTUM)
+    elif OPTIMIZER == "Adam":
+        optimizer_ft = optim.Adam(model_ft.parameters(), lr=LEARNING_RATE)
     num_epochs = NUM_EPOCHS
 
     model_ft = train_model(model_ft, criterion, optimizer_ft, dataloaders, dataset_sizes, device, num_epochs=num_epochs)
