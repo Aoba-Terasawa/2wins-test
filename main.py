@@ -17,6 +17,7 @@ VAL_SIZE = 0.5  # train : val : test = 0.7 : 0.15 : 0.15
 INPUT_SIZE = 448
 BATCH_SIZE = 32
 NUM_EPOCHS = 15
+WEIGHTS = [3.5, 1.0] # [bad, good]
 OPTIMIZER = "Adam"
 LEARNING_RATE = 0.0001
 # MOMENTUM = 0.9
@@ -169,7 +170,8 @@ if __name__ == '__main__':
     model_ft = create_model(len(class_names))
     model_ft = model_ft.to(device)
 
-    criterion = nn.CrossEntropyLoss()
+    weights = torch.tensor(WEIGHTS, dtype=torch.float32).to(device)
+    criterion = nn.CrossEntropyLoss(weight=weights)
     if OPTIMIZER == "SGD":
         optimizer_ft = optim.SGD(model_ft.parameters(), lr=LEARNING_RATE, momentum=MOMENTUM)
     elif OPTIMIZER == "Adam":
