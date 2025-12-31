@@ -11,6 +11,17 @@ from torchvision import models, transforms
 from sklearn.model_selection import train_test_split
 from my_utils import fix_seed, calculate_confusion_matrix
 
+DATA_DIR = r"C:\Users\user\2wins-test\dataset"
+TEST_SIZE = 0.3
+VAL_SIZE = 0.5  # train : val : test = 0.7 : 0.15 : 0.15
+INPUT_SIZE = 224
+BATCH_SIZE = 32
+NUM_EPOCHS = 10
+LEARNING_RATE = 0.001
+MOMENTUM = 0.9
+SEED = 42
+SAVE_NAME = "resnet18_base.pth"
+
 class ProductDataset(Dataset):
     def __init__(self, images_paths, labels, transform=None):
         self.images_paths = images_paths
@@ -106,9 +117,9 @@ def train_model(model, criterion, optimizer, dataloaders, dataset_sizes, device,
     return model
 
 if __name__ == '__main__':
-    fix_seed(42)
+    fix_seed(SEED)
 
-    datadir = r"C:\Users\user\2wins-test\dataset"
+    datadir = DATA_DIR
     if not os.path.exists(datadir):
         datadir = "dataset"
 
@@ -118,10 +129,10 @@ if __name__ == '__main__':
         exit()
 
     train_images_paths, temp_images_paths, train_labels, temp_labels = train_test_split(
-        all_images_paths, all_labels, test_size=0.3, random_state=42, stratify=all_labels
+        all_images_paths, all_labels, test_size=TEST_SIZE, random_state=SEED, stratify=all_labels
     )
     val_images_paths, test_images_paths, val_labels, test_labels = train_test_split(
-        temp_images_paths, temp_labels, test_size=0.5, random_state=42, stratify=temp_labels
+        temp_images_paths, temp_labels, test_size=VAL_SIZE, random_state=SEED, stratify=temp_labels
     )
 
     print(f"データ数 - Train: {len(train_images_paths)}, Val: {len(val_images_paths)}, Test: {len(test_images_paths)}")
@@ -129,7 +140,7 @@ if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(f"使用デバイス: {device}")
 
-    input_size = 224
+    input_size = INPUT_SIZE
 
     transform_train = transforms.Compose([
         transforms.Resize((input_size, input_size)),
@@ -146,7 +157,7 @@ if __name__ == '__main__':
     train_dataset = ProductDataset(train_images_paths, train_labels, transform=transform_train)
     val_dataset = ProductDataset(val_images_paths, val_labels, transform=transform_val)
 
-    batch_size = 32
+    batch_size = BATCH_SIZE
     dataloaders = {
         'train': DataLoader(train_dataset, batch_size=batch_size, shuffle=True),
         'val': DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
@@ -157,13 +168,13 @@ if __name__ == '__main__':
     model_ft = model_ft.to(device)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
-    num_epochs = 10
+    optimizer_ft = optim.SGD(model_ft.parameters(), lr=LEARNING_RATE, momentum=MOMENTUM)
+    num_epochs = NUM_EPOCHS
 
     model_ft = train_model(model_ft, criterion, optimizer_ft, dataloaders, dataset_sizes, device, num_epochs=num_epochs)
 
-    torch.save(model_ft.state_dict(), 'resnet18_base.pth')
-    print("モデルを保存しました (resnet18_base.pth)。")
+    torch.save(model_ft.state_dict(), SAVE_NAME)
+    print(f"モデルを保存しました ({SAVE_NAME})。")
 
     # 混同行列の計算
     calculate_confusion_matrix(model_ft, dataloaders['val'], device, class_names)
