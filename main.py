@@ -163,13 +163,15 @@ if __name__ == '__main__':
 
     train_dataset = ProductDataset(train_images_paths, train_labels, transform=transform_train)
     val_dataset = ProductDataset(val_images_paths, val_labels, transform=transform_val)
+    test_dataset = ProductDataset(test_images_paths, test_labels, transform=transform_val)
 
     batch_size = BATCH_SIZE
     dataloaders = {
         'train': DataLoader(train_dataset, batch_size=batch_size, shuffle=True),
-        'val': DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+        'val': DataLoader(val_dataset, batch_size=batch_size, shuffle=False),
+        'test': DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     }
-    dataset_sizes = {'train': len(train_dataset), 'val': len(val_dataset)}
+    dataset_sizes = {'train': len(train_dataset), 'val': len(val_dataset), 'test': len(test_dataset)}
 
     model_ft = create_model(len(class_names))
     model_ft = model_ft.to(device)
@@ -188,4 +190,8 @@ if __name__ == '__main__':
     print(f"モデルを保存しました ({SAVE_NAME})。")
 
     # 混同行列の計算
+    print("\n--- Validation Confusion Matrix ---")
     calculate_confusion_matrix(model_ft, dataloaders['val'], device, class_names, threshold=THRESHOLD)
+    
+    print("\n--- Test Confusion Matrix ---")
+    calculate_confusion_matrix(model_ft, dataloaders['test'], device, class_names, threshold=THRESHOLD)

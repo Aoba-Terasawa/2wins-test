@@ -49,7 +49,16 @@ def calculate_confusion_matrix(model, dataloader, device, class_names=None, thre
     if class_names:
         print("\n--- Classification Report ---")
         print(classification_report(all_labels, all_preds, target_names=class_names))
-        
+
+    print("\n--- Miss List ---")
+    for i, (true_label, pred_label) in enumerate(zip(all_labels, all_preds)):
+        if true_label != pred_label:
+            print(f"Index: {i}")
+            print(f"True Label: {class_names[true_label]} ({true_label})")
+            print(f"Predicted: {class_names[pred_label]} ({pred_label})")
+            print(f"Path: {dataloader.dataset.images_paths[i]}")
+            print()
+    
     return cm
 
 def plot_confusion_matrix(cm, class_names):
