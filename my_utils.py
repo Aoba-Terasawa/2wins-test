@@ -5,6 +5,10 @@ import torch
 from sklearn.metrics import confusion_matrix, classification_report
 import matplotlib.pyplot as plt
 import seaborn as sns
+from PIL import Image
+from pytorch_grad_cam import GradCAM
+from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
+from pytorch_grad_cam.utils.image import show_cam_on_image
 
 def fix_seed(seed=42):
     """
@@ -71,3 +75,24 @@ def plot_confusion_matrix(cm, class_names):
     plt.ylabel('True')
     plt.title('Confusion Matrix')
     plt.show()
+
+def save_gradcam_image(model, target_layer, image_path, transform, device, save_path):
+    model.eval()
+
+    rgb_img = Image.open(image_path).convert('RGB')
+    rgb_img = rgb_img.resize((448, 448))
+    input_tensor = transform(rgb_img).unsqueeze(0).to(device)
+    
+    cam = GradCAM(model=model, target_layers=[target_layer])
+    grayscale_cam = cam(input_tensor=input_tensor, targets=None)[0, :]
+
+    rgb_img_float = np.array(rgb_img).astype(np.float32) / 255.0
+
+    visualization_array = show_cam_on_image(rgb_img_float, grayscale_cam, use_rgb=True)
+    
+    visualization_image = Image.fromarray(visualization_array)
+    visualization_image.save(save_path)
+    
+    print(f"Grad-CAM result saved (PIL) to: {save_path}")
+    
+    
