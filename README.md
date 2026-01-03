@@ -26,3 +26,44 @@ pip install -r requirements.txt
 
 # 3. 実行
 python main.py
+```
+
+## 4. 結果
+### Validデータの混同行列 (Confusion Matrix)
+| | 予測: bad | 予測: good |
+| :--- | :---: | :---: |
+| **正解: bad** | **TP** 52 | **FN** 0 |
+| **正解: good** | **FP** 1 | **TN** 149 |
+
+### Validデータのスコア
+| 指標 | スコア |
+| :--- | :--- |
+| **Accuracy（正解率）** | 0.99 |
+| **Recall（bad）** | 1.00 |
+
+
+### Testデータの混同行列 (Confusion Matrix)
+| | 予測: bad | 予測: good |
+| :--- | :---: | :---: |
+| **正解: bad** | **TP** 49 | **FN** 4 |
+| **正解: good** | **FP** 0 | **TN** 150 |
+
+### Testデータのスコア
+| 指標 | スコア |
+| :--- | :--- |
+| **Accuracy（正解率）** | 0.98 |
+| **Recall（bad）** | 0.92 |
+
+## 5. 分析
+### 成功の場合(予測 bad 結果 bad)
+<img src="analysis_results_example/resized_1.png" width="48%">
+<img src="analysis_results_example/gradcam_1.png" width="48%">
+
+### 失敗の場合１(予測 good 結果 bad) 傷の場所を捉えられていない
+<img src="analysis_results_example/resized_3.png" width="48%">
+<img src="analysis_results_example/gradcam_3.png" width="48%">
+
+### 失敗の場合２(予測 good 結果 bad) 傷の場所を捉えているが、分類ミス
+<img src="analysis_results_example/resized_5.png" width="48%">
+<img src="analysis_results_example/gradcam_5.png" width="48%">
+
