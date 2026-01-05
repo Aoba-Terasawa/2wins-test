@@ -2,7 +2,7 @@ import os
 import random
 import numpy as np
 import torch
-from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import confusion_matrix, classification_report, roc_curve
 import matplotlib.pyplot as plt
 import seaborn as sns
 from PIL import Image
@@ -64,6 +64,34 @@ def calculate_confusion_matrix(model, dataloader, device, class_names=None, thre
             print()
     
     return cm
+
+def find_best_threshold(model, dataloader, device):
+    model.eval()
+    all_preds = []
+    all_labels = []
+    
+    with torch.no_grad():
+        for inputs, labels in dataloader:
+            inputs = inputs.to(device)
+            
+            outputs = model(inputs)
+            probs = torch.softmax(outputs, dim=1)
+            good_probs = probs[:, 1]
+            
+            all_preds.extend(good_probs.cpu().numpy())
+            all_labels.extend(labels.numpy())
+
+    fpr, tpr, thresholds = roc_curve(all_labels, all_preds)
+
+    tmp = np.where(fpr <= 0)[0]
+    idx = tmp[-1]
+    best_threshold = thresholds[idx]
+    
+    return best_threshold
+
+
+    
+    
 
 def plot_confusion_matrix(cm, class_names):
     """

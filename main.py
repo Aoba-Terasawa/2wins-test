@@ -9,7 +9,7 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from torchvision import models, transforms
 from sklearn.model_selection import train_test_split
-from my_utils import fix_seed, calculate_confusion_matrix
+from my_utils import fix_seed, calculate_confusion_matrix, find_best_threshold
 
 DATA_DIR = r"C:\Users\user\2wins-test\dataset"
 TEST_SIZE = 0.3
@@ -18,7 +18,7 @@ INPUT_SIZE = 448
 BATCH_SIZE = 32
 NUM_EPOCHS = 15
 WEIGHTS = [3.5, 1.0] # [bad, good]
-THRESHOLD = 0.95
+THRESHOLD = 0.95    # best Threshold=0.9598596692085266
 OPTIMIZER = "Adam"
 LEARNING_RATE = 0.0001
 # MOMENTUM = 0.9
@@ -189,9 +189,12 @@ if __name__ == '__main__':
     torch.save(model_ft.state_dict(), SAVE_NAME)
     print(f"モデルを保存しました ({SAVE_NAME})。")
 
+    best_threshold = find_best_threshold(model_ft, dataloaders['val'], device)
+    print(f"Best threshold: {best_threshold}")
+
     # 混同行列の計算
     print("\n--- Validation Confusion Matrix ---")
-    calculate_confusion_matrix(model_ft, dataloaders['val'], device, class_names, threshold=THRESHOLD)
+    calculate_confusion_matrix(model_ft, dataloaders['val'], device, class_names, threshold=best_threshold)
     
     print("\n--- Test Confusion Matrix ---")
-    calculate_confusion_matrix(model_ft, dataloaders['test'], device, class_names, threshold=THRESHOLD)
+    calculate_confusion_matrix(model_ft, dataloaders['test'], device, class_names, threshold=best_threshold)
